@@ -1,0 +1,30 @@
+{
+  "name": "entra-tenant-resolver",
+  "version": "1.0.0",
+  "description": "Discover the Microsoft Entra tenant for Azure subscriptions and Key Vaults without signing in.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gakama/entra-tenant-resolver.git"
+  },
+  "homepage": "https://github.com/gakama/entra-tenant-resolver#readme",
+  "bugs": "https://github.com/gakama/entra-tenant-resolver/issues",
+  "keywords": ["azure", "entra", "tenant", "subscription", "key-vault", "cli"],
+  "type": "module",
+  "main": "./index.js",
+  "exports": "./index.js",
+  "bin": {
+    "entra-tenant-resolver": "./cli.js"
+  },
+  "files": [
+    "cli.js",
+    "index.js"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check index.js && node --check cli.js"
+  },
+  "license": "MIT"
+}
