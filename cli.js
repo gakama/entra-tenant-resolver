@@ -3,11 +3,16 @@ import { realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { resolveTenant } from './index.js';
 
-const usage = `Usage: npx entra-tenant-resolver [--json] <subscription-guid|key-vault-url> [...]
+const usage = `Usage: npx entra-tenant-resolver [--json] [-t] <subscription-guid|key-vault-url> [...]
 
 Prints one "input tenantId" line per successful lookup. No Azure login required.
 Inputs may mix subscription GUIDs and HTTPS Key Vault base URLs.
-Use --json to print an array of results, including errors, as JSON.
+
+Options:
+  --json              Print an array of results, including errors, as JSON.
+  -t, --tenant-only   Print only tenant IDs. With --json, print an array of
+                      tenant IDs (null for failures) and errors on stderr.
+  -h, --help          Show this help.
 `;
 
 export async function run(args, {
@@ -15,8 +20,10 @@ export async function run(args, {
   stdout = process.stdout,
   stderr = process.stderr,
 } = {}) {
+  const flags = new Set(['--json', '-t', '--tenant-only']);
   const json = args.includes('--json');
-  const inputs = args.filter((arg) => arg !== '--json');
+  const tenantOnly = args.includes('-t') || args.includes('--tenant-only');
+  const inputs = args.filter((arg) => !flags.has(arg));
   if (inputs.length === 1 && (inputs[0] === '--help' || inputs[0] === '-h')) {
     stdout.write(usage);
     return 0;
@@ -35,12 +42,15 @@ export async function run(args, {
         throw new Error('No tenant found (HTTP 400 or 404).');
       }
       if (json) {
-        results.push({ input, tenantId });
+        results.push(tenantOnly ? tenantId : { input, tenantId });
       } else {
-        stdout.write(`${input} ${tenantId}\n`);
+        stdout.write(tenantOnly ? `${tenantId}\n` : `${input} ${tenantId}\n`);
       }
     } catch (error) {
-      if (json) {
+      if (json && tenantOnly) {
+        results.push(null);
+        stderr.write(`${input}: ${error.message}\n`);
+      } else if (json) {
         results.push({ input, tenantId: null, error: error.message });
       } else {
         stderr.write(`${input}: ${error.message}\n`);

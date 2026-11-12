@@ -48,6 +48,17 @@ npx entra-tenant-resolver --json 11111111-2222-3333-4444-555555555555 https://my
 In JSON mode, lookup errors are included in the array rather than written to
 stderr. Any failed lookup still sets exit code 1.
 
+Add `-t` (or `--tenant-only`) to print only tenant IDs, one per line, which is handy
+for scripts:
+
+```sh
+tenant=$(npx entra-tenant-resolver -t 11111111-2222-3333-4444-555555555555)
+```
+
+Failed lookups are skipped on stdout and reported on stderr. Combined with
+`--json`, it prints an array of tenant IDs in input order, using `null` for
+failures (for example `["aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee", null]`).
+
 ## How it works
 
 Sends an unauthenticated GET to the subscription endpoint (ARM API `2016-06-01`)

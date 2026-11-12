@@ -71,3 +71,22 @@ test('includes failures in JSON while continuing lookups and setting a nonzero e
   ]);
   assert.equal(output.stderr, '');
 });
+
+test('--tenant-only and -t print only tenant IDs, reporting failures on stderr', async () => {
+  for (const flag of ['-t', '--tenant-only']) {
+    const { output, options } = capture(async (input) => (input === 'missing' ? null : `${input}-tenant`));
+    assert.equal(await run(['sub', flag, 'missing', 'vault'], options), 1);
+    assert.equal(output.stdout, 'sub-tenant\nvault-tenant\n');
+    assert.match(output.stderr, /^missing: No tenant found/);
+  }
+});
+
+test('--tenant-only with --json prints a positional array of tenant IDs with null for failures', async () => {
+  const { output, options } = capture(async (input) => {
+    if (input === 'bad') throw new Error('Invalid input');
+    return `${input}-tenant`;
+  });
+  assert.equal(await run(['--json', '-t', 'sub', 'bad', 'vault'], options), 1);
+  assert.deepEqual(JSON.parse(output.stdout), ['sub-tenant', null, 'vault-tenant']);
+  assert.equal(output.stderr, 'bad: Invalid input\n');
+});
