@@ -22,6 +22,11 @@
   "engines": {
     "node": ">=22"
   },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "test": "node --test",
     "check": "node --check index.js && node --check cli.js"

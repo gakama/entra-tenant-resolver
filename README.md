@@ -101,7 +101,17 @@ git push --follow-tags
 gh release create v1.0.1 --generate-notes
 ```
 
-One-time setup: publish the first version manually (`npm publish`), then on
-npmjs.com open the package's settings → Trusted Publisher → GitHub Actions and
-enter owner `gakama`, repository `entra-tenant-resolver`, workflow `publish.yml`,
-environment `npm`.
+One-time setup (also works when the local network blocks `registry.npmjs.org`,
+because publishing happens on GitHub Actions):
+
+1. On npmjs.com create a granular access token with read/write on packages, and
+   save it as the `NPM_TOKEN` secret in the repo's `npm` environment:
+   `gh secret set NPM_TOKEN --env npm -R gakama/entra-tenant-resolver`.
+2. Create the first release (`gh release create v1.0.0 --generate-notes`).
+3. On npmjs.com open the package's settings → Trusted Publisher → GitHub Actions
+   and enter owner `gakama`, repository `entra-tenant-resolver`, workflow
+   `publish.yml`, environment `npm`. Then delete the `NPM_TOKEN` secret and the
+   token; later releases publish via OIDC.
+
+The project `.npmrc` and `publishConfig` point npm at the public registry, so a
+machine-wide corporate feed setting doesn't affect this package.

@@ -27,4 +27,7 @@ jobs:
           fi
       - run: npm run check
       - run: npm test
-      - run: npm publish --access public
+      - run: npm publish
+        env:
+          # Only needed for the first publish; afterwards trusted publishing (OIDC) is used.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
